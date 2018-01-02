@@ -3,15 +3,16 @@ import numpy as np
 import sys
 
 decay = 0.99
-model = TestNet01MyReg(input_shape=(5, 8))
 error = 1.0
 onezero = np.array([[1.], [0.]], dtype=float)
 zeroone = np.array([[0.], [0.]], dtype=float)
 
+model = TestNet01MyReg(input_shape=(5, 8))
+
 step = 0
 while True:
     step += 1
-    x = inputSwapped()
+    x = inputLinSwapped()
     x, y = (x, onezero) if np.random.uniform() < 0.5 else (x[::-1], zeroone)
 
     # print "training on %s -> %s" % (x, y)
