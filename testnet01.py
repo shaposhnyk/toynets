@@ -1,5 +1,6 @@
 import numpy as np
 import pickle
+from train_ins import *
 
 
 def sigmoid(x):
@@ -47,7 +48,8 @@ class HLNet:
         return p, h
 
     def preprocess(self, x):
-        return x.reshape((x.size, 1))
+        binX = intToBinary(x)
+        return binX.reshape((binX.size, 1))
 
     def update(self, grads):
         for k, v in self.model.iteritems():
@@ -68,48 +70,34 @@ class HLNetRegL1(HLNet):
             Wk += self.learning_rate * g / (np.sqrt(g ** 2) + 1e-7)
 
 
-def TestNet01My(input_shape):
-    return HLNet()
+class HLSinNet(HLNetRegL1):
+    def __init__(self, H=10, D=8 * 5, O=2, resume=False):
+        HLNetRegL1.__init__(self, H, D, O, resume)
+        self.l1lambda = self.learning_rate * 1e-4
+
+    def preprocess(self, x):
+        binX = floatToBinary(x, digits=16)
+        return binX.reshape((binX.size, 1))
 
 
-def TestNet01MyReg(input_shape):
-    return HLNetRegL1()
+def LinNet01My(input_shape, h=10):
+    return HLNet(D=input_shape[0] * input_shape[1])
 
 
-def inputLin(lo=0, hi=255, size=5):
-    """ raising sequence """
-    x = np.random.randint(lo, hi, size)
-    x.sort()
-    return x
+def LinNet01MyReg(input_shape, h=10):
+    return HLNetRegL1(D=input_shape[0] * input_shape[1])
 
 
-def inputLinSwapped(lo=0, hi=255, size=5):
-    """ raising sequence with 2nd and 4th el swapped """
-    x = np.random.randint(lo, hi, size)
-    x.sort()
-    x[1], x[3] = x[3], x[1]
-    return x
-
-
-def preprocess_input(x):
-    binX = toBinary(x)
-    return binX.reshape((1, binX.shape[0], binX.shape[1]))
+def SinNet01MyReg(input_shape, h=80):
+    """ 40 neurons seem sufficient for input of 20x16b, but 60 (or more) are converging faster """
+    return HLSinNet(D=input_shape[0] * input_shape[1])
 
 
 def decode_predictions(p):
     return [p]
 
 
-def toBinary(x, digits=8):
-    """ Converts array x to an array of bits of x with a given number of digits """
-    masks = np.array([1 << d for d in range(0, digits)])
-    x = x.reshape((len(x), 1))
-    masked = x.repeat(digits, 1) & masks
-    masked[masked > 0] = 1.0
-    return np.array(masked, dtype=float)
-
-
 if __name__ == "__main__":
     x = input();
     print "x\n", x
-    print "bin\n", toBinary(x)
+    print "bin\n", intToBinary(x)
