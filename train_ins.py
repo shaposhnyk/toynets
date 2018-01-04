@@ -2,6 +2,10 @@ import numpy as np
 import math
 
 
+def sigmoid(x):
+    return 1.0 / (1.0 + np.exp(-x))  # sigmoid "squashing" function to interval [0,1]
+
+
 def inputLin(lo=0, hi=255, size=5):
     """ raising sequence """
     x = np.random.randint(lo, hi, size)
@@ -17,11 +21,23 @@ def inputLinSwapped(lo=0, hi=255, size=5):
     return x
 
 
-def inputSinMy(phi0, size=10, parts=16, shift=math.pi / 2, digits=16):
-    phi = math.pi / parts
+def inputSinMyFq(phi0, size=10, parts=16, shift=math.pi / 2, digits=16):
+    period = math.pi / parts
     high = 2 ** (digits - 2)
-    x0 = inputSinRaw(phi, phi0=phi0, size=size)
-    x1 = inputSinRaw(phi, phi0=phi0 + shift, size=size)
+    scale = np.random.uniform(0.5, 4)
+    x0 = inputSinRaw(period * scale, phi0=phi0 * scale, size=size)
+    x1 = inputSinRaw(period * scale, phi0=phi0 * scale + shift, size=size)
+    x0sum, x1sum = np.sum(x0), np.sum(x1)
+    # print ("x0", fstr(x0), x0sum)
+    # print ("x1", fstr(x1), x1sum)
+    return [x0 * high + 2 * high, (x1sum + 2 * size) / (x0sum + 2 * size)]
+
+
+def inputSinMy(phi0, size=10, parts=16, shift=math.pi / 2, digits=16):
+    period = math.pi / parts
+    high = 2 ** (digits - 2)
+    x0 = inputSinRaw(period, phi0=phi0, size=size)
+    x1 = inputSinRaw(period, phi0=phi0 + shift, size=size)
     x0sum, x1sum = np.sum(x0), np.sum(x1)
     # print ("x0", fstr(x0), x0sum)
     # print ("x1", fstr(x1), x1sum)
